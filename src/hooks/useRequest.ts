@@ -3,7 +3,9 @@ import axios, { AxiosResponse, Canceler } from 'axios';
 import { getRandomId, isEmpty } from '@/utils';
 import useDidUpdate from '@/hooks/useDidUpdate';
 
-const clientRequest = axios.create({});
+const clientRequest = axios.create({
+  baseURL: '/api'
+});
 
 const COMPONENT_UPDATE_MESSAGE = 'component update';
 const COMPONENT_UNMOUNT_MESSAGE = 'component unmount';
@@ -15,9 +17,8 @@ interface RequestCancelerRef {
 /**
  * @description 组件内请求的 hooks
  * @param inputs 改变会取消正在发起的请求
- * @returns {[function(*, *=): Promise<[*, null]|[null, null]>, boolean]}
  */
-const useRequest = <T = any>(inputs = []) => {
+const useRequest = (inputs = []) => {
   const requests = useRef<RequestCancelerRef>({});
   const [loading, setLoading] = useState(false);
 
@@ -41,50 +42,54 @@ const useRequest = <T = any>(inputs = []) => {
     }
   };
 
-  const request = useCallback(
-    async (url: string, data?: object, config?: object) => {
-      if (!data && !config) {
-        // 无参数则是开启 loading 之后有异步任务，然后再进行请求，通过 loading 可以禁用按钮
-        !loading && setLoading(true);
-        return;
-      }
+  async function request(
+    url: string,
+    data?: object,
+    config?: object
+  ): Promise<[null, AxiosResponse<any>]>;
+  async function request(
+    url: string,
+    data?: object,
+    config?: object
+  ): Promise<[object]>;
+  async function request(url: string, data?: object, config?: object) {
+    // 规定组件内所有请求都通过 此方法来发送以便维护
+    !loading && setLoading(true);
 
-      // 规定组件内所有请求都通过 此方法来发送以便维护
-      !loading && setLoading(true);
-
-      const _id = getRandomId();
-      const promise = clientRequest<T>(
-        Object.assign({ data, url }, config, {
-          cancelToken: new axios.CancelToken(cancel => {
-            requests.current[_id] = cancel;
-          })
+    const _id = getRandomId();
+    const promise = clientRequest(
+      Object.assign({ data, url }, config, {
+        cancelToken: new axios.CancelToken(cancel => {
+          requests.current[_id] = cancel;
         })
-      );
+      })
+    );
 
-      let error = null;
-      let res: AxiosResponse<T> | null = null;
+    let error: unknown = null;
+    let res: AxiosResponse | null = null;
 
-      try {
-        res = await promise;
-      } catch (err) {
-        // 这里因为组件已经卸载了，就直接返回，不走下面的逻辑了
-        if (axios.isCancel(err) && err.message === COMPONENT_UNMOUNT_MESSAGE) {
-          return [err, {}];
-        }
-        error = err;
+    try {
+      res = await promise;
+    } catch (err) {
+      // 这里因为组件已经卸载了，就直接返回，不走下面的逻辑了
+      if (axios.isCancel(err) && err.message === COMPONENT_UNMOUNT_MESSAGE) {
+        return [err];
       }
+      error = err;
+    }
 
-      delete requests.current[_id];
-      if (isEmpty(requests.current)) {
-        setLoading(false);
-      }
+    delete requests.current[_id];
+    if (isEmpty(requests.current)) {
+      setLoading(false);
+    }
 
-      return [error, res];
-    },
-    [loading]
-  );
-
-  return [request, loading];
+    if (error) {
+      return [error];
+    } else {
+      return [null, res];
+    }
+  }
+  return [useCallback(request, [loading]), loading] as const;
 };
 
 export default useRequest;

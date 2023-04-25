@@ -26,7 +26,12 @@ module.exports = env => {
       },
       hot: true,
       allowedHosts: 'all',
-      proxy: {},
+      proxy: {
+        '/api/': {
+          target: 'http://localhost:8888',
+          pathRewrite: { '^/api/': '' }
+        }
+      },
       port: 8080
     }
   });
