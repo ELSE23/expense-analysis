@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRequest } from '@/hooks';
-import OverviewCard from './libs/OverviewCard';
+import ChartsCard from './libs/ChartsCard';
 import styles from './style.module.scss';
 
 export interface Propertie {
@@ -54,9 +54,9 @@ const Analysis = () => {
 
   return (
     <div className={styles.container}>
-      <OverviewCard title="总览" data={propertieData} loading={loading} />
+      <ChartsCard title="总览" data={propertieData} loading={loading} />
       {multipleTags.map(tag => (
-        <OverviewCard
+        <ChartsCard
           key={tag}
           title={`${tag}的支出`}
           data={propertieData.filter(item => item.tags[0] === tag)}

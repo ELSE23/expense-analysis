@@ -5,7 +5,7 @@ import { Properties } from '../..';
 import { useDidUpdate } from '@/hooks';
 import dayjs from 'dayjs';
 
-interface OverviewCardProps {
+interface ChartsCardProps {
   title: string;
   data: Properties;
   loading: boolean;
@@ -18,7 +18,7 @@ interface Serie {
   data: number[];
 }
 
-const OverviewCard = ({ title, data, loading }: OverviewCardProps) => {
+const ChartsCard = ({ title, data, loading }: ChartsCardProps) => {
   const allEventsSet = new Set<string>();
   data.forEach(item => {
     allEventsSet.add(item.event);
@@ -69,6 +69,7 @@ const OverviewCard = ({ title, data, loading }: OverviewCardProps) => {
       <Select
         style={{ width: '100%', marginBottom: 10 }}
         allowClear
+        showSearch={false}
         mode="multiple"
         maxTagCount={3}
         value={filterEvents}
@@ -162,4 +163,4 @@ const OverviewCard = ({ title, data, loading }: OverviewCardProps) => {
   );
 };
 
-export default React.memo(OverviewCard);
+export default React.memo(ChartsCard);
