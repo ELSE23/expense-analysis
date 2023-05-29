@@ -4,6 +4,7 @@ import { getRandomId, isEmpty } from '@/utils';
 import useDidUpdate from '@/hooks/useDidUpdate';
 
 const clientRequest = axios.create({
+  method: 'POST',
   baseURL: '/api'
 });
 
@@ -18,7 +19,7 @@ interface RequestCancelerRef {
  * @description 组件内请求的 hooks
  * @param inputs 改变会取消正在发起的请求
  */
-const useRequest = (inputs = []) => {
+const useRequest = (inputs: any[] = []) => {
   const requests = useRef<RequestCancelerRef>({});
   const [loading, setLoading] = useState(false);
 

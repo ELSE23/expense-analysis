@@ -67,14 +67,15 @@ const ChartsCard = ({ title, data, loading }: ChartsCardProps) => {
   return (
     <Card title={title} loading={loading}>
       <Select
-        style={{ width: '100%', marginBottom: 10 }}
         allowClear
-        showSearch={false}
+        size="large"
         mode="multiple"
         maxTagCount={3}
+        showSearch={false}
         value={filterEvents}
         onChange={setFilterEvents}
         options={allEvents.map(event => ({ value: event, label: event }))}
+        style={{ width: '100%', marginBottom: 10 }}
       />
       <Alert
         type="success"
