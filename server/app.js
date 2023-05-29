@@ -1,13 +1,14 @@
 /* eslint-disable no-undef */
 const express = require('express');
 const axios = require('axios');
+const bodyParser = require('body-parser');
 
 const app = express();
 
 const notionApiKey = process.env.NOTION_API_KEY;
 const databaseId = process.env.NOTION_DATABASE_ID;
 
-app.get('/getExpenseData', async (req, res) => {
+app.post('/databases', bodyParser.json(), async (req, res) => {
   try {
     const response = await axios({
       method: 'post',
@@ -16,7 +17,8 @@ app.get('/getExpenseData', async (req, res) => {
         'Content-Type': 'application/json',
         'Notion-Version': '2022-06-28',
         Authorization: `Bearer ${notionApiKey}`
-      }
+      },
+      data: req.body
     });
 
     res.send(response.data);
